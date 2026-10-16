@@ -97,6 +97,21 @@ npm run build
 npm run test
 ```
 
+### GitHub Pages Deployment
+
+This repository is configured for GitHub Pages with two deployment methods:
+
+#### Method 1: Automatic Deployment via GitHub Actions (Recommended)
+1. In your GitHub repository, navigate to **Settings** > **Pages**.
+2. Under **Build and deployment** > **Source**, choose **GitHub Actions**.
+3. Push to `main` or `master` branch. The included `.github/workflows/deploy.yml` workflow will automatically test, build, and deploy your simulation.
+
+#### Method 2: Manual Deployment via CLI
+Run the deploy script to build and push to the `gh-pages` branch:
+```bash
+npm run deploy
+```
+
 ---
 
 ## Keyboard Shortcuts
