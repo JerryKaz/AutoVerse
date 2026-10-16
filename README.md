@@ -1,4 +1,7 @@
 # AutoVerse - 3D Autonomous Driving Simulation (Accra, Ghana)
+<img width="1919" height="889" alt="image" src="https://github.com/user-attachments/assets/6345e0d9-71e4-4863-9f70-17d2830f1e42" />
+
+
 
 A production-grade, real-time 3D autonomous driving and urban traffic simulation set in **Accra, Ghana**, built with TypeScript, Three.js, and React.
 
