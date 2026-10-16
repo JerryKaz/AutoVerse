@@ -303,7 +303,8 @@ export class Vehicle {
     dt: number,
     allVehicles: Vehicle[],
     roadNetwork: RoadNetwork,
-    trafficManager: TrafficManager
+    trafficManager: TrafficManager,
+    isSelected: boolean = false
   ): void {
     this.timeInSimulation += dt;
 
@@ -313,20 +314,24 @@ export class Vehicle {
 
     // 1. Perception Scan
     const currentPos = { x: this.controller.x, z: this.controller.z };
+
+    // Single pass snapshot of all vehicles for perception to minimize GC pressure
+    const vehicleProxies = allVehicles.map(v => ({
+      id: v.id,
+      x: v.controller.x,
+      z: v.controller.z,
+      yaw: v.controller.yaw,
+      velocity: v.controller.velocity,
+      currentLaneId: v.currentLane.id,
+    }));
+
     const leadVehicle = this.sensors.detectLeadVehicle(
       this.id,
       currentPos,
       this.controller.yaw,
       this.controller.velocity,
       this.currentLane.id,
-      allVehicles.map(v => ({
-        id: v.id,
-        x: v.controller.x,
-        z: v.controller.z,
-        yaw: v.controller.yaw,
-        velocity: v.controller.velocity,
-        currentLaneId: v.currentLane.id,
-      }))
+      vehicleProxies
     );
 
     // Calculate distance along current lane
@@ -351,13 +356,7 @@ export class Vehicle {
       currentPos,
       this.controller.yaw,
       this.currentLane.leftAdjacentLaneId,
-      allVehicles.map(v => ({
-        id: v.id,
-        x: v.controller.x,
-        z: v.controller.z,
-        velocity: v.controller.velocity,
-        currentLaneId: v.currentLane.id,
-      }))
+      vehicleProxies
     );
 
     const rightLaneGap = this.sensors.evaluateAdjacentLaneGap(
@@ -365,20 +364,18 @@ export class Vehicle {
       currentPos,
       this.controller.yaw,
       this.currentLane.rightAdjacentLaneId,
-      allVehicles.map(v => ({
-        id: v.id,
-        x: v.controller.x,
-        z: v.controller.z,
-        velocity: v.controller.velocity,
-        currentLaneId: v.currentLane.id,
-      }))
+      vehicleProxies
     );
 
-    const lidarObstacles = allVehicles
-      .filter(v => v.id !== this.id && Math.hypot(v.controller.x - currentPos.x, v.controller.z - currentPos.z) < 30)
-      .map(v => ({ x: v.controller.x, z: v.controller.z, radius: 1.5 }));
+    // Only compute costly 24-ray LiDAR raycasts for the actively selected vehicle overlay
+    let lidarPoints: Array<{ x: number; z: number; hit: boolean }> = [];
+    if (isSelected) {
+      const lidarObstacles = allVehicles
+        .filter(v => v.id !== this.id && Math.hypot(v.controller.x - currentPos.x, v.controller.z - currentPos.z) < 30)
+        .map(v => ({ x: v.controller.x, z: v.controller.z, radius: 1.5 }));
 
-    const lidarPoints = this.sensors.generateLidarPointCloud(currentPos, this.controller.yaw, lidarObstacles);
+      lidarPoints = this.sensors.generateLidarPointCloud(currentPos, this.controller.yaw, lidarObstacles);
+    }
 
     this.lastSensorData = {
       leadVehicle,

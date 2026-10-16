@@ -61,8 +61,8 @@ export class Environment {
     this.ambientLight = new THREE.AmbientLight(0xffffff, 0.4);
     this.scene.add(this.ambientLight);
 
-    // 5. Initialize Fog
-    this.scene.fog = new THREE.FogExp2(0x94a3b8, 0.0035);
+    // 5. Initialize Atmospheric Fog (Linear fog with distant horizon)
+    this.scene.fog = new THREE.Fog(0xa5c9eb, 220, 850);
 
     // Apply default Day / Clear
     this.setTimeOfDay('day');
@@ -70,6 +70,8 @@ export class Environment {
 
   public setTimeOfDay(time: TimeOfDay): void {
     this.currentTimeOfDay = time;
+
+    const fog = this.scene.fog as THREE.Fog;
 
     switch (time) {
       case 'day':
@@ -81,8 +83,11 @@ export class Environment {
         this.hemiLight.intensity = 1.3;
         this.ambientLight.intensity = 0.5;
         this.scene.background = new THREE.Color(0xa5c9eb);
-        (this.scene.fog as THREE.FogExp2).color.setHex(0xa5c9eb);
-        (this.scene.fog as THREE.FogExp2).density = this.currentWeather === 'fog' ? 0.02 : 0.0025;
+        if (fog) {
+          fog.color.setHex(this.currentWeather === 'fog' ? 0xd6be9e : 0xa5c9eb);
+          fog.near = this.currentWeather === 'fog' ? 60 : 220;
+          fog.far = this.currentWeather === 'fog' ? 280 : 850;
+        }
         break;
 
       case 'sunset':
@@ -94,8 +99,11 @@ export class Environment {
         this.hemiLight.intensity = 1.0;
         this.ambientLight.intensity = 0.35;
         this.scene.background = new THREE.Color(0x7c2d12);
-        (this.scene.fog as THREE.FogExp2).color.setHex(0x7c2d12);
-        (this.scene.fog as THREE.FogExp2).density = this.currentWeather === 'fog' ? 0.022 : 0.0035;
+        if (fog) {
+          fog.color.setHex(this.currentWeather === 'fog' ? 0x9a5a32 : 0x7c2d12);
+          fog.near = this.currentWeather === 'fog' ? 50 : 220;
+          fog.far = this.currentWeather === 'fog' ? 280 : 850;
+        }
         break;
 
       case 'night':
@@ -107,8 +115,11 @@ export class Environment {
         this.hemiLight.intensity = 0.4;
         this.ambientLight.intensity = 0.2;
         this.scene.background = new THREE.Color(0x020617);
-        (this.scene.fog as THREE.FogExp2).color.setHex(0x020617);
-        (this.scene.fog as THREE.FogExp2).density = this.currentWeather === 'fog' ? 0.025 : 0.004;
+        if (fog) {
+          fog.color.setHex(0x020617);
+          fog.near = this.currentWeather === 'fog' ? 50 : 200;
+          fog.far = this.currentWeather === 'fog' ? 260 : 800;
+        }
         break;
     }
   }
@@ -116,20 +127,22 @@ export class Environment {
   public setWeather(weather: WeatherType): void {
     this.currentWeather = weather;
 
-    const fog = this.scene.fog as THREE.FogExp2;
-    if (weather === 'fog') {
-      // Harmattan dust haze / coastal Atlantic mist
-      fog.density = 0.015;
-      if (this.currentTimeOfDay === 'day') {
-        fog.color.setHex(0xd6be9e); // warm Saharan Harmattan dust haze
-      } else if (this.currentTimeOfDay === 'sunset') {
-        fog.color.setHex(0x9a5a32);
+    const fog = this.scene.fog as THREE.Fog;
+    if (fog) {
+      if (weather === 'fog') {
+        // Harmattan dust haze / coastal Atlantic mist
+        fog.near = 60;
+        fog.far = 280;
+        if (this.currentTimeOfDay === 'day') fog.color.setHex(0xd6be9e);
+        else if (this.currentTimeOfDay === 'sunset') fog.color.setHex(0x9a5a32);
+        else fog.color.setHex(0x020617);
+      } else {
+        fog.near = 220;
+        fog.far = 850;
+        if (this.currentTimeOfDay === 'day') fog.color.setHex(0xa5c9eb);
+        else if (this.currentTimeOfDay === 'sunset') fog.color.setHex(0x7c2d12);
+        else fog.color.setHex(0x020617);
       }
-    } else {
-      fog.density = this.currentTimeOfDay === 'night' ? 0.004 : 0.0025;
-      if (this.currentTimeOfDay === 'day') fog.color.setHex(0xa5c9eb);
-      else if (this.currentTimeOfDay === 'sunset') fog.color.setHex(0x7c2d12);
-      else fog.color.setHex(0x020617);
     }
 
     if (weather === 'rain') {

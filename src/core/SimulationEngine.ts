@@ -33,6 +33,7 @@ export class SimulationEngine {
   // Animation frame id
   private animationFrameId: number | null = null;
   private isRunning: boolean = false;
+  private collisionCooldowns: Map<string, number> = new Map();
 
   constructor(container: HTMLElement) {
     this.eventBus = EventBus.getInstance();
@@ -236,7 +237,8 @@ export class SimulationEngine {
 
     for (let i = 0; i < vehicleArray.length; i++) {
       const veh = vehicleArray[i];
-      veh.update(dt, vehicleArray, this.roadNetwork, this.trafficManager);
+      const isSelected = veh.id === this.selectedVehicle?.id;
+      veh.update(dt, vehicleArray, this.roadNetwork, this.trafficManager, isSelected);
 
       // Update spatial grid
       this.vehicleSpatialGrid.update({ id: veh.id, x: veh.controller.x, z: veh.controller.z });
@@ -256,9 +258,11 @@ export class SimulationEngine {
    * Collision detection using spatial partitioning and oriented bounding radii.
    */
   private checkAndResolveCollisions(vehicles: Vehicle[]): void {
+    const simTime = this.timeManager.getSimulatedTime();
+
     for (let i = 0; i < vehicles.length; i++) {
       const v1 = vehicles[i];
-      const nearby = this.vehicleSpatialGrid.queryRadius(v1.controller.x, v1.controller.z, 12);
+      const nearby = this.vehicleSpatialGrid.queryRadius(v1.controller.x, v1.controller.z, 10);
 
       for (let j = 0; j < nearby.length; j++) {
         const item = nearby[j];
@@ -271,15 +275,22 @@ export class SimulationEngine {
         const dz = v2.controller.z - v1.controller.z;
         const dist = Math.hypot(dx, dz);
 
-        const minSafeDist = (v1.config.length + v2.config.length) * 0.42;
+        // Physical collision bounding distance (actual geometric overlap)
+        const minSafeDist = (v1.config.length + v2.config.length) * 0.36;
 
         if (dist < minSafeDist && dist > 0.001) {
-          // Collision event
-          this.eventBus.emit('vehicle:collision', {
-            vehicleId1: v1.id,
-            vehicleId2: v2.id,
-            location: [(v1.controller.x + v2.controller.x) / 2, 0.5, (v1.controller.z + v2.controller.z) / 2],
-          });
+          const pairKey = `${v1.id}_${v2.id}`;
+          const lastCollisionTime = this.collisionCooldowns.get(pairKey) || 0;
+
+          // Enforce a 2.0s cooldown per vehicle pair to prevent 60Hz collision event storms
+          if (simTime - lastCollisionTime > 2.0) {
+            this.collisionCooldowns.set(pairKey, simTime);
+            this.eventBus.emit('vehicle:collision', {
+              vehicleId1: v1.id,
+              vehicleId2: v2.id,
+              location: [(v1.controller.x + v2.controller.x) / 2, 0.5, (v1.controller.z + v2.controller.z) / 2],
+            });
+          }
 
           // Soft impulse push-back to prevent overlapping mesh clipping
           const overlap = (minSafeDist - dist) * 0.5;
@@ -291,9 +302,9 @@ export class SimulationEngine {
           v2.controller.x += nx * overlap;
           v2.controller.z += nz * overlap;
 
-          // Zero out velocities to simulate fender-bender emergency brake
-          v1.controller.velocity = Math.max(0, v1.controller.velocity * 0.2);
-          v2.controller.velocity = Math.max(0, v2.controller.velocity * 0.2);
+          // Dampen velocities on physical collision
+          v1.controller.velocity = Math.max(0, v1.controller.velocity * 0.5);
+          v2.controller.velocity = Math.max(0, v2.controller.velocity * 0.5);
         }
       }
     }
@@ -330,6 +341,7 @@ export class SimulationEngine {
     // Reset systems
     this.trafficManager.reset();
     this.timeManager.reset();
+    this.collisionCooldowns.clear();
 
     // Re-populate initial fleet
     this.populateInitialFleet(this.targetDensity);

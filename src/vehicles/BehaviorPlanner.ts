@@ -42,7 +42,8 @@ export class BehaviorPlanner {
     let debugMessage = 'Cruising normally';
 
     // 1. EMERGENCY COLLISION AVOIDANCE
-    if (sensorData.leadVehicle && (sensorData.leadVehicle.timeToCollision < 1.3 || sensorData.leadVehicle.distance < 2.8)) {
+    const minSafeCenterDist = this.config.length * 0.95;
+    if (sensorData.leadVehicle && (sensorData.leadVehicle.timeToCollision < 1.2 || sensorData.leadVehicle.distance < minSafeCenterDist)) {
       this.state = 'EMERGENCY_BRAKE';
       targetAcceleration = -this.config.emergencyDeceleration;
       debugMessage = `EMERGENCY BRAKE: TTC=${sensorData.leadVehicle.timeToCollision.toFixed(1)}s, dist=${sensorData.leadVehicle.distance.toFixed(1)}m`;

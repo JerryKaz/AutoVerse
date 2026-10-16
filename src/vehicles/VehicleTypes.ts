@@ -50,7 +50,7 @@ export const VEHICLE_CONFIGS: Record<VehicleClass, VehicleConfig> = {
     emergencyDeceleration: 6.0,
     maxSteeringAngle: 0.50,
     desiredTimeHeadway: 1.6,
-    jamDistance: 4.0,
+    jamDistance: 6.8, // 5.3m length + 1.5m bumper gap
     accelerationExponent: 4,
     colorPalette: ['#f8fafc', '#ffffff', '#f1f5f9'],
     isTrotro: true,
@@ -68,7 +68,7 @@ export const VEHICLE_CONFIGS: Record<VehicleClass, VehicleConfig> = {
     emergencyDeceleration: 6.5,
     maxSteeringAngle: 0.60,
     desiredTimeHeadway: 1.3,
-    jamDistance: 3.4,
+    jamDistance: 6.0, // 4.55m length + 1.45m bumper gap
     accelerationExponent: 4,
     colorPalette: ['#1e293b', '#0f172a', '#1e3a5f', '#334155'],
     isGhTaxi: true,
@@ -86,7 +86,7 @@ export const VEHICLE_CONFIGS: Record<VehicleClass, VehicleConfig> = {
     emergencyDeceleration: 7.0,
     maxSteeringAngle: 0.55,
     desiredTimeHeadway: 1.3,
-    jamDistance: 3.8,
+    jamDistance: 6.4, // 4.85m length + 1.55m bumper gap
     accelerationExponent: 4,
     colorPalette: ['#f8fafc', '#cbd5e1', '#475569', '#134e4a', '#1e293b'],
   },
@@ -103,7 +103,7 @@ export const VEHICLE_CONFIGS: Record<VehicleClass, VehicleConfig> = {
     emergencyDeceleration: 6.5,
     maxSteeringAngle: 0.60,
     desiredTimeHeadway: 1.4,
-    jamDistance: 3.5,
+    jamDistance: 6.2, // 4.65m length + 1.55m bumper gap
     accelerationExponent: 4,
     colorPalette: ['#374151', '#1e293b', '#9ca3af', '#1e3a5f', '#e2e8f0'],
   },
@@ -120,7 +120,7 @@ export const VEHICLE_CONFIGS: Record<VehicleClass, VehicleConfig> = {
     emergencyDeceleration: 5.5,
     maxSteeringAngle: 0.48,
     desiredTimeHeadway: 1.8,
-    jamDistance: 4.5,
+    jamDistance: 7.0, // 5.4m length + 1.6m bumper gap
     accelerationExponent: 4,
     colorPalette: ['#f1f5f9', '#334155', '#b45309', '#4b5563'],
   },
