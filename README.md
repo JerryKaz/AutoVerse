@@ -2,7 +2,7 @@
 
 A production-grade, real-time 3D autonomous driving and urban traffic simulation set in **Accra, Ghana**, built with TypeScript, Three.js, and React.
 
-Vehicles — including autonomous Trotros (minibuses), iconic yellow-fender Accra taxis, electric robotaxis, and logistics couriers — navigate corridors modeled after Accra's major avenues (Liberation Road, Independence Avenue, Oxford Street, and Ring Road Central) past landmarks like the **Black Star Gate & Independence Arch**, the **Jamestown Lighthouse**, and the **Atlantic coastline (Gulf of Guinea)**.
+Vehicles including autonomous Trotros (minibuses), iconic yellow-fender Accra taxis, electric robotaxis, and logistics couriers navigate corridors modeled after Accra's major avenues (Liberation Road, Independence Avenue, Oxford Street, and Ring Road Central) past landmarks like the **Black Star Gate & Independence Arch**, the **Jamestown Lighthouse**, and the **Atlantic coastline (Gulf of Guinea)**.
 
 ---
 
