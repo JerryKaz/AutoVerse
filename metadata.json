@@ -1,0 +1,6 @@
+{
+  "name": "AutoVerse - 3D Autonomous Driving Simulation",
+  "description": "Production-grade 3D autonomous driving and traffic simulation set in Accra, Ghana, featuring autonomous Trotros, Ghanaian taxis, Black Star Gate, Jamestown Lighthouse, coastal Atlantic corridor, and real-time telemetry.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
